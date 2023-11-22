@@ -72,7 +72,10 @@ class ConcreteDropout(nn.Module):
         Tensor
             Output from the dropout layer.
         """
-        output = layer(self._concrete_dropout(x))
+        if self.training or self.mc_dropout:
+            output = layer(self._concrete_dropout(x))
+        else:
+            output = layer(x)
 
         sum_of_squares = 0
         for param in layer.parameters():
