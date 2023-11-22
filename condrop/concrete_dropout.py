@@ -6,13 +6,12 @@ from torch import Tensor
 
 
 class ConcreteDropout(nn.Module):
-
-    """Concrete Dropout.
+    """
+    Concrete Dropout.
 
     Implementation of the Concrete Dropout module as described in the
     'Concrete Dropout' paper: https://arxiv.org/pdf/1705.07832
     """
-
     def __init__(
         self,
         weight_regulariser: float,
@@ -54,8 +53,8 @@ class ConcreteDropout(nn.Module):
         self.regularisation = 0.0
 
     def forward(self, x: Tensor, layer: nn.Module) -> Tensor:
-
-        """Calculates the forward pass.
+        """
+        Calculates the forward pass.
 
         The regularisation term for the layer is calculated and assigned to a
         class attribute - this can later be accessed to evaluate the loss.
@@ -92,8 +91,8 @@ class ConcreteDropout(nn.Module):
         return output
 
     def _concrete_dropout(self, x: Tensor) -> Tensor:
-
-        """Computes the Concrete Dropout.
+        """
+        Computes the Concrete Dropout.
 
         Parameters
         ----------
