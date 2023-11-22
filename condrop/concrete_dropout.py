@@ -13,13 +13,18 @@ class ConcreteDropout(nn.Module):
     'Concrete Dropout' paper: https://arxiv.org/pdf/1705.07832
     """
 
-    def __init__(self,
-                 weight_regulariser: float,
-                 dropout_regulariser: float,
-                 init_min: float = 0.1,
-                 init_max: float = 0.1) -> None:
+    def __init__(
+        self,
+        weight_regulariser: float,
+        dropout_regulariser: float,
+        init_min: float = 0.1,
+        init_max: float = 0.1,
+        temperate: float = 0.1,
+        mc_dropout: bool = False,
+    ) -> None:
 
-        """Concrete Dropout.
+        """
+        Concrete Dropout.
 
         Parameters
         ----------
@@ -32,7 +37,6 @@ class ConcreteDropout(nn.Module):
         init_max : float
             Initial max value.
         """
-
         super().__init__()
 
         self.weight_regulariser = weight_regulariser
@@ -43,6 +47,9 @@ class ConcreteDropout(nn.Module):
 
         self.p_logit = nn.Parameter(torch.empty(1).uniform_(init_min, init_max))
         self.p = torch.sigmoid(self.p_logit)
+
+        self.temperature = temperate
+        self.mc_dropout = mc_dropout
 
         self.regularisation = 0.0
 
@@ -65,7 +72,6 @@ class ConcreteDropout(nn.Module):
         Tensor
             Output from the dropout layer.
         """
-
         output = layer(self._concrete_dropout(x))
 
         sum_of_squares = 0
@@ -96,24 +102,24 @@ class ConcreteDropout(nn.Module):
         Tensor
             Outputs from Concrete Dropout.
         """
-
-        eps = 1e-7
+        eps = torch.finfo(x.dtype).eps
         tmp = 0.1
 
         self.p = torch.sigmoid(self.p_logit)
         u_noise = torch.rand_like(x)
 
-        drop_prob = (torch.log(self.p + eps) -
-                     torch.log(1 - self.p + eps) +
-                     torch.log(u_noise + eps) -
-                     torch.log(1 - u_noise + eps))
+        drop_prob = (
+            torch.log(self.p + eps) -
+            torch.log(1 - self.p + eps) +
+            torch.log(u_noise + eps) -
+            torch.log(1 - u_noise + eps)
+        )
 
         drop_prob = torch.sigmoid(drop_prob / tmp)
 
-        random_tensor = 1 - drop_prob
-        retain_prob = 1 - self.p
+        random_dropout_mask = 1.0 - drop_prob
+        retain_prob = 1.0 - self.p
 
-        x = torch.mul(x, random_tensor) / retain_prob
-
+        x = torch.mul(x, random_dropout_mask) / retain_prob
         return x
 

@@ -5,8 +5,8 @@ from ..concrete_dropout import ConcreteDropout as CDr
 
 
 def concrete_regulariser(model: nn.Module) -> nn.Module:
-
-    """Adds ConcreteDropout regularisation functionality to a nn.Module.
+    """
+    Adds ConcreteDropout regularisation functionality to a nn.Module.
 
     Parameters
     ----------
@@ -20,8 +20,8 @@ def concrete_regulariser(model: nn.Module) -> nn.Module:
     """
 
     def regularisation(self) -> Tensor:
-
-        """Calculates ConcreteDropout regularisation for each module.
+        """
+        Calculates ConcreteDropout regularisation for each module.
 
         The total ConcreteDropout can be calculated by iterating through
         each module in the model and accumulating the regularisation for
@@ -32,7 +32,6 @@ def concrete_regulariser(model: nn.Module) -> nn.Module:
         Tensor
             Total ConcreteDropout regularisation.
         """
-
         total_regularisation = 0
         for module in filter(lambda x: isinstance(x, CDr), self.modules()):
             total_regularisation += module.regularisation
